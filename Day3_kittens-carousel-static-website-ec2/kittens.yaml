@@ -7,14 +7,14 @@ Description:
 
 Parameters:
 
-  LatestAmiId:
+  imageID:
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
     Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
 
   keyPair:
     Description: Choose your keypair
     Type: AWS::EC2::KeyPair::KeyName
-    Default: ottoaws9
+    Default: ismailkey
 
   instanceType:
     Description: Choose your instance type
@@ -28,6 +28,17 @@ Parameters:
   
 Resources:
 
+  mySecGrp:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: allows ssh and http # Required
+      GroupName: kitten-project-scgrp
+      SecurityGroupIngress: 
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
   myWebServer:
     Type: AWS::EC2::Instance
       Properties:
@@ -35,10 +46,10 @@ Resources:
       InstanceType: !Ref instanceType
       KeyName: !Ref keyPair
       SecurityGroupIds: 
-        - !Ref mySecGrp # !GetAtt mySecGrp.GroupId
+        - !Ref mySecGrp
       Tags: 
         - Key: Name
-          Value: !Sub ${AWS::StackName}
+          Value: !Sub Web Server of ${AWS::StackName}
       UserData: !Base64 |
         #! /bin/bash
         dnf update -y
@@ -53,16 +64,7 @@ Resources:
         systemctl start httpd
         systemctl enable httpd
 
-  mySecGrp:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: allows ssh and http # Required
-      GroupName: kitten-project-scgrp
-      SecurityGroupIngress: 
-        - IpProtocol: tcp
-          FromPort: 22
-          ToPort: 80
-          CidrIp: 0.0.0.0/0
+  
 
 Outputs:
   webSiteURL:
