@@ -7,6 +7,7 @@ aws --version
 ```
 
 - Write your credentials using this command
+
 ```bash
 aws configure
 ```
@@ -22,6 +23,7 @@ aws ec2 create-security-group \
 ```
 
 - We can check the security Group with these commands
+
 ```bash
 aws ec2 describe-security-groups --group-names roman_numbers_sec_grp1
 ```
@@ -51,59 +53,65 @@ aws ec2 authorize-security-group-ingress \
 3. After creating security Groups, We'll create our EC2 which has latest AMI id. to do this, we need to find out latest AMI with AWS system manager (ssm) command
 
 - This command is to run querry to get latest AMI ID
+
 ```bash
 aws ssm get-parameters --names /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64 --query 'Parameters[0].[Value]' --output text
 ```
 
-- We can assign this latest AMI id output to the LATEST_AMI environmental variable and use in our CLI command 
+- We can assign this latest AMI id output to the LATEST_AMI environmental variable and use in our CLI command
 
 ```
-(LATEST_AMI=xxxxxxxxxxxxxxxx)
+(LATEST_AMI=ami-0453ec754f44f9a4a)
 ```
-- or we can directly fetch the last version via  using "resolve:ssm". We keep going with using "resolve:ssm" option. 
+
+- or we can directly fetch the last version via using "resolve:ssm". We keep going with using "resolve:ssm" option.
 
 - in home directory of Ec2 create a userdata.sh file with following
 
 ```
-#! /bin/bash
-
-yum update -y
-yum install python3 -y
-yum install python3-pip -y
-pip3 install flask
-yum install git -y
-FOLDER="https://raw.githubusercontent.com/awsdevopsteam/roman-number-conventor/master/templates"
-cd /home/ec2-user
-wget -P templates ${FOLDER}/index.html
-wget -P templates ${FOLDER}/result.html
-wget https://raw.githubusercontent.com/awsdevopsteam/roman-number-conventor/master/roman-numerals-converter-app.py
-python3 roman-numerals-converter-app.py
+          touch userdata.sh
+          vim userdata.sh
+          #! /bin/bash
+          dnf update -y
+          dnf install python3 -y
+          dnf install python3-pip -y
+          pip3 install flask
+          dnf install git -y
+          FOLDER="https://raw.githubusercontent.com/iskilicaslan61/AWS-Projects/refs/heads/main/Day4_roman-numerals-converter/templates"
+          cd /home/ec2-user
+          wget -P templates ${FOLDER}/index.html
+          wget -P templates ${FOLDER}/result.html
+          wget https://raw.githubusercontent.com/iskilicaslan61/AWS-Projects/refs/heads/main/Day4_roman-numerals-converter/roman-numerals-converter-app.py
+          python3 roman-numerals-converter-app.py
 ```
+
 - As for the student who use his/her own local terminal, they need to show the absulete path of userdata.sh file
 
 - Now we can run the instance with CLI command. (Do not forget to create userdata.sh under "/home/ec2-user/" folder before run this command)
 
 ```bash
-aws ec2 run-instances --image-id $LATEST_AMI --count 1 --instance-type t2.micro --key-name ottoaws9 --security-groups roman_numbers_sec_grp1 --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=roman_numbers}]' --user-data file:///Users/ODG/Desktop/git_dir/osvaldo-cw/porfolio_lesson_plan/week_6/CLI_solution/userdata.sh
+aws ec2 run-instances --image-id $LATEST_AMI --count 1 --instance-type t2.micro --key-name ismailkey --security-groups roman_numbers_sec_grp1 --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=roman_numbers}]' --user-data file:///Users/ODG/Desktop/git_dir/osvaldo-cw/porfolio_lesson_plan/week_6/CLI_solution/userdata.sh
 
 or
 
 aws ec2 run-instances \
-    --image-id resolve:ssm:/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64 \
+    --image-id $LATEST_AMI\
     --count 1 \
     --instance-type t2.micro \
-    --key-name ottoaws9 \
+    --key-name ismailkey \
     --security-groups roman_numbers_sec_grp1 \
     --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=roman_numbers}]'\
     --user-data file:///home/ec2-user/userdata.sh
 ```
 
 - To see the each instances Ip we'll use describe instance CLI command
+
 ```bash
 aws ec2 describe-instances --filters "Name=tag:Name,Values=roman_numbers"
 ```
 
 - You can run the query to find Public IP and instance_id of instances:
+
 ```bash
 aws ec2 describe-instances --filters "Name=tag:Name,Values=roman_numbers" --query 'Reservations[].Instances[].PublicIpAddress[]'
 
@@ -111,10 +119,13 @@ aws ec2 describe-instances --filters "Name=tag:Name,Values=roman_numbers" --quer
 ```
 
 - To delete instances
-```bash 
+
+```bash
 aws ec2 terminate-instances --instance-ids <We have already learned this id with query on above>
 ```
+
 - To delete security groups
+
 ```bash
 aws ec2 delete-security-group --group-name roman_numbers_sec_grp1
 ```

@@ -33,9 +33,9 @@ Resources:
           ToPort: 8080
           CidrIp: 0.0.0.0/0
     # https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-instance.html
-  ec2-instance:
-    Type: AWS::EC2::Instance
-    Properties: 
+  WebServerHost:
+      Type: AWS::EC2::Instance
+      Properties: 
         ImageId: !Ref LatestAmiId
         InstanceType: t2.micro
         KeyName: !Ref KeyName
@@ -45,20 +45,19 @@ Resources:
           - Key: Name
             Value: !Sub Web Server of ${AWS::StackName} Stack 
         
-      UserData: 
-        !Base64 |
-        #! /bin/bash
-        dnf update -y
-        dnf install python3 -y
-        dnf install python3-pip -y
-        pip3 install flask
-        dnf install git -y
-        FOLDER="https://raw.githubusercontent.com/iskilicaslan61/AWS-Projects/refs/heads/main/Day4_roman-numerals-converter/templates"
-        cd /home/ec2-user
-        wget -P templates ${FOLDER}/index.html
-        wget -P templates ${FOLDER}/result.html
-        wget https://raw.githubusercontent.com/iskilicaslan61/AWS-Projects/refs/heads/main/Day4_roman-numerals-converter/roman-numerals-converter-app.py
-        python3 roman-numerals-converter-app.py 
+        UserData: !Base64 |
+          #! /bin/bash
+          dnf update -y
+          dnf install python3 -y
+          dnf install python3-pip -y
+          pip3 install flask
+          dnf install git -y
+          FOLDER="https://raw.githubusercontent.com/iskilicaslan61/AWS-Projects/refs/heads/main/Day4_roman-numerals-converter/templates"
+          cd /home/ec2-user
+          wget -P templates ${FOLDER}/index.html
+          wget -P templates ${FOLDER}/result.html
+          wget https://raw.githubusercontent.com/iskilicaslan61/AWS-Projects/refs/heads/main/Day4_roman-numerals-converter/roman-numerals-converter-app.py
+          python3 roman-numerals-converter-app.py 
           
 Outputs: 
   WebsiteURL:
