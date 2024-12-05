@@ -38,10 +38,9 @@ Resources:
           FromPort: 22
           ToPort: 80
           CidrIp: 0.0.0.0/0
-
   myWebServer:
     Type: AWS::EC2::Instance
-      Properties:
+    Properties: 
       ImageId: !Ref imageID
       InstanceType: !Ref instanceType
       KeyName: !Ref keyPair
