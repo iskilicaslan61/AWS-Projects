@@ -34,10 +34,11 @@ Resources:
       GroupDescription: allows ssh and http # Required
       GroupName: kitten-project-scgrp
       SecurityGroupIngress: 
-        - IpProtocol: tcp
+          IpProtocol: tcp
           FromPort: 22
           ToPort: 80
           CidrIp: 0.0.0.0/0
+
   myWebServer:
     Type: AWS::EC2::Instance
     Properties: 
@@ -49,10 +50,9 @@ Resources:
       Tags: 
         - Key: Name
           Value: !Sub Web Server of ${AWS::StackName}
-      UserData: !Base64 |
-
-        #! /bin/bash
-
+      UserData: 
+        !Sub |
+        #!/bin/bash
         dnf update -y
         dnf install httpd -y
         FOLDER="https://raw.githubusercontent.com/iskilicaslan61/AWS-Projects/refs/heads/main/Day3_kittens-carousel-static-website-ec2/static-web"
@@ -65,11 +65,11 @@ Resources:
         systemctl start httpd
         systemctl enable httpd
 
-  
-
 Outputs:
   webSiteURL:
     Description: URL of website
     Value: !Sub
       - http://${PublicDNS}
       - PublicDNS: !GetAtt myWebServer.PublicDnsName
+
+      
