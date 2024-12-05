@@ -11,7 +11,7 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
     Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
 
-keyPair:
+  keyPair:
     Description: Choose your keypair
     Type: AWS::EC2::KeyPair::KeyName
     Default: ottoaws9
@@ -30,7 +30,7 @@ Resources:
 
   myWebServer:
     Type: AWS::EC2::Instance
-    Properties:
+      Properties:
       ImageId: !Ref imageID
       InstanceType: !Ref instanceType
       KeyName: !Ref keyPair
@@ -43,7 +43,7 @@ Resources:
         #! /bin/bash
         dnf update -y
         dnf install httpd -y
-        FOLDER="https://raw.githubusercontent.com/awsdevopsteam/101-cfn-static-website-ec2/master/static-web"
+        FOLDER="https://raw.githubusercontent.com/iskilicaslan61/AWS-Projects/refs/heads/main/Day3_kittens-carousel-static-website-ec2/static-web/index.html?token=GHSAT0AAAAAAC3J52JBVS5RVMPHHAW3LBWGZ2RRH3A"
         cd /var/www/html
         wget ${FOLDER}/index.html
         wget ${FOLDER}/cat0.jpg
