@@ -6,10 +6,10 @@ from flaskext.mysql import MySQL
 app = Flask(__name__)
 
 # Configure mysql database
-app.config['MYSQL_DATABASE_HOST'] = 'clarusway.cbanmzptkrzf.us-east-1.rds.amazonaws.com'
-app.config['MYSQL_DATABASE_USER'] = 'admin'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'Clarusway_1'
-app.config['MYSQL_DATABASE_DB'] = 'clarusway'
+app.config['MYSQL_DATABASE_HOST'] = 'math.c5i6e2kemznc.us-east-1.rds.amazonaws.com'
+app.config['MYSQL_DATABASE_USER'] = 'ismail'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'ismail_ismail'
+app.config['MYSQL_DATABASE_DB'] = 'math'
 app.config['MYSQL_DATABASE_PORT'] = 3306
 mysql = MySQL()
 mysql.init_app(app)
@@ -31,11 +31,11 @@ CREATE TABLE users (
 data = """
 INSERT INTO clarusway.users 
 VALUES 
-    ("Steven", "ahmet@amazon.com"),
-    ("John", "John@google.com"),
-    ("Roselyn", "roselyn@bmw.com"),
-    ("Hannah", "hannah@mercedes.com"),
-	("Frank", "frank@porche.com");
+    ("Hasan", "hasan@amazon.com"),
+    ("ibrahim", "ibrahim@google.com"),
+    ("aynur", "aynur@bmw.com"),
+    ("ramazan", "ramazan@mercedes.com"),
+	("caner", "caner@porche.com");
 """
 cursor.execute(drop_table)
 cursor.execute(users_table)
