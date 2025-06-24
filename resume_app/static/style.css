@@ -1,6 +1,6 @@
 body {
-    font-family: Arial, sans-serif;
-    background: #f8f9fa;
+    font-family: 'Segoe UI', sans-serif;
+    background: #f0f2f5;
     margin: 0;
     padding: 0;
 }
@@ -15,52 +15,45 @@ body {
 }
 
 h1, h2, h3 {
-    color: #343a40;
+    color: #2c3e50;
 }
 
 form label {
     display: block;
-    margin: 15px 0 5px;
+    margin-top: 15px;
     font-weight: bold;
 }
 
 input, textarea {
     width: 100%;
     padding: 10px;
-    border: 1px solid #ced4da;
-    border-radius: 5px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
     box-sizing: border-box;
 }
 
 button {
     margin-top: 20px;
-    background-color: #007bff;
+    background-color: #3498db;
     color: white;
     padding: 12px 20px;
     border: none;
-    border-radius: 6px;
+    border-radius: 5px;
     cursor: pointer;
     font-size: 16px;
 }
 
 button:hover {
-    background-color: #0056b3;
-}
-
-.resume section {
-    margin-bottom: 20px;
-}
-
-.resume ul {
-    padding-left: 20px;
+    background-color: #2980b9;
 }
 
 .download-btn {
-    background-color: #28a745;
+    background-color: #27ae60;
 }
 
 .download-btn:hover {
-    background-color: #218838;
+    background-color: #1e8449;
 }
 
 .button-group {
@@ -71,7 +64,7 @@ button:hover {
 
 a.btn {
     text-decoration: none;
-    background-color: #007bff;
+    background-color: #3498db;
     color: white;
     padding: 12px 20px;
     border-radius: 6px;
@@ -79,13 +72,9 @@ a.btn {
 }
 
 a.btn:hover {
-    background-color: #0056b3;
+    background-color: #2980b9;
 }
-
-a.btn-secondary {
-    background-color: #6c757d;
-}
-
-a.btn-secondary:hover {
-    background-color: #5a6268;
+.error {
+    color: red;
+    margin-top: 10px;
 }

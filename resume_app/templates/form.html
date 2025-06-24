@@ -1,36 +1,48 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Resume Builder</title>
+    <title>Lebenslauf Formular</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <h2>Create Your Resume</h2>
-        <form action="/resume" method="post">
-            <label>Name:</label>
-            <input name="name" required>
+<div class="container">
+    <h2>Lebenslauf Formular</h2>
+    <form action="/resume" method="post">
+        <label>Vollständiger Name:</label>
+        <input name="name" required>
 
-            <label>Email:</label>
-            <input name="email" type="email" required>
+        <label>Adresse:</label>
+        <input name="address">
 
-            <label>Phone:</label>
-            <input name="phone" required>
+        <label>Telefon:</label>
+        <input name="phone">
 
-            <label>Summary:</label>
-            <textarea name="summary" rows="4" required></textarea>
+        <label>E-Mail:</label>
+        <input name="email" type="email">
 
-            <label>Skills:</label>
-            <textarea name="skills" rows="3" placeholder="Separate by commas"></textarea>
+        <label>Geburtsdatum:</label>
+        <input name="dob" type="date">
 
-            <label>Experience:</label>
-            <textarea name="experience" rows="4"></textarea>
+        <label>Berufsziel / Profil:</label>
+        <textarea name="summary" rows="3"></textarea>
 
-            <label>Education:</label>
-            <textarea name="education" rows="3"></textarea>
+        <label>Berufserfahrung:</label>
+        <textarea name="experience" rows="4"></textarea>
 
-            <button type="submit">Generate Resume</button>
-        </form>
-    </div>
+        <label>Bildung:</label>
+        <textarea name="education" rows="3"></textarea>
+
+        <label>Fähigkeiten:</label>
+        <textarea name="skills" rows="2"></textarea>
+
+        <label>Sprachen:</label>
+        <textarea name="languages" rows="2"></textarea>
+
+        <label>Zertifikate / Schulungen:</label>
+        <textarea name="certificates" rows="2"></textarea>
+
+        <button type="submit">Lebenslauf anzeigen</button>
+    </form>
+</div>
 </body>
 </html>

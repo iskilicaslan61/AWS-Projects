@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Resume Builder - Home</title>
+    <title>Lebenslauf Generator</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>Welcome to the Resume Builder</h1>
-        <p>Create a professional resume in minutes.</p>
-
+        <h1>Willkommen beim Lebenslauf Generator</h1>
+        <p>Erstellen Sie Ihren professionellen Lebenslauf einfach online.</p>
         <div class="button-group">
-            <a href="{{ url_for('form') }}" class="btn">Create Resume</a>
-            <a href="{{ url_for('sample_resume') }}" class="btn btn-secondary">View Sample Resume</a>
+            <a href="{{ url_for('form') }}" class="btn">Lebenslauf erstellen</a>
         </div>
     </div>
 </body>
