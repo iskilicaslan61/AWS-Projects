@@ -1,0 +1,91 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #f8f9fa;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 800px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1, h2, h3 {
+    color: #343a40;
+}
+
+form label {
+    display: block;
+    margin: 15px 0 5px;
+    font-weight: bold;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+button {
+    margin-top: 20px;
+    background-color: #007bff;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.resume section {
+    margin-bottom: 20px;
+}
+
+.resume ul {
+    padding-left: 20px;
+}
+
+.download-btn {
+    background-color: #28a745;
+}
+
+.download-btn:hover {
+    background-color: #218838;
+}
+
+.button-group {
+    margin-top: 30px;
+    display: flex;
+    gap: 20px;
+}
+
+a.btn {
+    text-decoration: none;
+    background-color: #007bff;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+a.btn:hover {
+    background-color: #0056b3;
+}
+
+a.btn-secondary {
+    background-color: #6c757d;
+}
+
+a.btn-secondary:hover {
+    background-color: #5a6268;
+}

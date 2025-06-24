@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ data.name }} - Resume</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container resume">
+        <h1>{{ data.name }}</h1>
+        <p><strong>Email:</strong> {{ data.email }} | <strong>Phone:</strong> {{ data.phone }}</p>
+
+        <section>
+            <h3>Summary</h3>
+            <p>{{ data.summary }}</p>
+        </section>
+
+        <section>
+            <h3>Skills</h3>
+            <ul>
+                {% for skill in data.skills.split(',') %}
+                    <li>{{ skill.strip() }}</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section>
+            <h3>Experience</h3>
+            <p>{{ data.experience }}</p>
+        </section>
+
+        <section>
+            <h3>Education</h3>
+            <p>{{ data.education }}</p>
+        </section>
+
+        <form action="/download" method="post">
+            {% for key, value in data.items() %}
+                <input type="hidden" name="{{ key }}" value="{{ value }}">
+            {% endfor %}
+            <button type="submit" class="download-btn">Download PDF</button>
+        </form>
+    </div>
+</body>
+</html>
