@@ -1,0 +1,95 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Auto Scaling Group (ASG) behind Application Load Balancer (ALB)
+
+Parameters:
+
+  VPCParameter:
+    Description: Select the VPC where the resources will be created
+    Type: AWS::EC2::VPC::Id
+
+  SubnetParameter:
+    Description: Select the subnet where the resources will be created 
+    Type: List<AWS::EC2::Subnet::Id>
+
+  InstanceType:
+    Description: Select the instance type for the EC2 instances in the Auto Scaling Group
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t3.micro
+      - t2.nano
+
+  keyName:
+    Description: Name of the key pair to use for SSH access to the instances
+    Type: AWS::EC2::KeyPair::KeyName
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      AMI: ami-05ffe3c48a9991133
+    eu-central-1:
+      AMI: ami-0229b8f55e5178b65
+
+Resources:
+
+  mySG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTP and SSH access to EC2
+      VpcId: !Ref VPCParameter
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: MySecurityGroup
+      
+
+  myInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", AMI]
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref keyName
+      SecurityGroupIds:
+        - !Ref mySG
+      UserData:
+          Fn::Base64: !Sub |
+            #!/bin/bash
+            # Update the operating system
+            yum update -y
+
+            # Install Apache web server and Git
+            yum install -y httpd git
+
+            # Set permissions for Apache's root directory
+            chmod -R 777 /var/www/html
+
+            # Navigate to Apache's root directory and remove default files
+            FOLDER= "https://raw.githubusercontent.com/iskilicaslan61/Projects/refs/heads/main/101-kittens-carousel-static-website-ec2/static-web/"
+            cd /var/www/html
+            wget ${FOLDER}/index.html
+            wget ${FOLDER}/cat0.jpg
+            wget ${FOLDER}/cat1.jpg
+            wget ${FOLDER}/cat2.jpg
+            wget ${FOLDER}/cat3.png
+
+
+            # Start and enable Apache to run on system boot
+            systemctl start httpd
+            systemctl enable httpd
+
+ 
+Outputs:
+
+  PublicIP:
+    Description: Public IP address of the EC2 instance
+    Value: !GetAtt [myInstance, PublicIp]
