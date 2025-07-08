@@ -1,6 +1,8 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-Description: Auto Scaling Group (ASG) behind Application Load Balancer (ALB)
+Description: >
+  This template creates an EC2 instance in a specified VPC subnet with a security group 
+  that allows HTTP and SSH access. The instance is configured to run a static website using Apache.
 
 Parameters:
 
@@ -9,11 +11,11 @@ Parameters:
     Type: AWS::EC2::VPC::Id
 
   SubnetParameter:
-    Description: Select the subnet where the resources will be created 
-    Type: List<AWS::EC2::Subnet::Id>
+    Description: Select the Subnet where the EC2 instance will be launched
+    Type: AWS::EC2::Subnet::Id
 
   InstanceType:
-    Description: Select the instance type for the EC2 instances in the Auto Scaling Group
+    Description: Select the instance type for the EC2 instance
     Type: String
     Default: t2.micro
     AllowedValues:
@@ -22,7 +24,7 @@ Parameters:
       - t2.nano
 
   keyName:
-    Description: Name of the key pair to use for SSH access to the instances
+    Description: Name of the key pair to use for SSH access to the instance
     Type: AWS::EC2::KeyPair::KeyName
 
 Mappings:
@@ -51,7 +53,6 @@ Resources:
       Tags:
         - Key: Name
           Value: MySecurityGroup
-      
 
   myInstance:
     Type: AWS::EC2::Instance
@@ -59,37 +60,25 @@ Resources:
       ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", AMI]
       InstanceType: !Ref InstanceType
       KeyName: !Ref keyName
+      SubnetId: !Ref SubnetParameter
       SecurityGroupIds:
         - !Ref mySG
       UserData:
-          Fn::Base64: !Sub |
-            #!/bin/bash
-            # Update the operating system
-            yum update -y
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y
+          yum install -y httpd git
+          chmod -R 777 /var/www/html
+          cd /var/www/html
+          rm -rf /var/www/html/*
+          git clone https://github.com/iskilicaslan61/Projects.git
+          cp -r Projects/101-kittens-carousel-static-website-ec2/static-web/* .
+          rm -rf Projects
+          systemctl start httpd
+          systemctl enable httpd
 
-            # Install Apache web server and Git
-            yum install -y httpd git
-
-            # Set permissions for Apache's root directory
-            chmod -R 777 /var/www/html
-
-            # Navigate to Apache's root directory and remove default files
-            FOLDER= "https://raw.githubusercontent.com/iskilicaslan61/Projects/refs/heads/main/101-kittens-carousel-static-website-ec2/static-web/"
-            cd /var/www/html
-            wget ${FOLDER}/index.html
-            wget ${FOLDER}/cat0.jpg
-            wget ${FOLDER}/cat1.jpg
-            wget ${FOLDER}/cat2.jpg
-            wget ${FOLDER}/cat3.png
-
-
-            # Start and enable Apache to run on system boot
-            systemctl start httpd
-            systemctl enable httpd
-
- 
 Outputs:
 
   PublicIP:
     Description: Public IP address of the EC2 instance
-    Value: !GetAtt [myInstance, PublicIp]
+    Value: !GetAtt myInstance.PublicIp
