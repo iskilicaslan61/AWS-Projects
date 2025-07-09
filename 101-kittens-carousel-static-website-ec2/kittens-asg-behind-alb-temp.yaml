@@ -1,0 +1,150 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Auto Scaling Group(ASG) behind Application Load Balancer (ALB)
+
+Parameters:
+
+  VPCParameter:
+    Description: Select the VPC where the resources will be created
+    Type: AWS::EC2::VPC::Id
+  
+  SubnetParameter:
+    Description: Select the subnet where the resources will be created 
+    Type: List<AWS::EC2::Subnet::Id>
+
+  InstanceType:
+    Description: Select the instance type for the EC2 instances in the Auto Scaling Group
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t3.micro
+      - t2.nano
+
+  keyName:
+    Description: Name of the key pair to use for SSH access to the instances
+    Type: AWS::EC2::KeyPair::KeyName
+    
+
+
+Mappings:
+  RegionMap:
+    us-east-1:
+      AMI: ami-05ffe3c48a9991133  # AMI for us-east-1
+    eu-central-1:
+      AMI: ami-0229b8f55e5178b65  # AMI for eu-central-1 
+
+
+
+Resources:
+  myALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+    
+      Subnets: !Ref SubnetParameter
+      SecurityGroups:
+        - !GetAtt mySG.GroupId
+      IpAddressType: ipv4
+      Type: application
+  myListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref myTG
+      LoadBalancerArn: !Ref myALB
+      Port: 80
+      Protocol: HTTP
+  myASG:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      DesiredCapacity: 2
+      HealthCheckGracePeriod: 0
+      HealthCheckType: ELB
+      LaunchTemplate:
+        LaunchTemplateId: !Ref myLT
+        Version: !GetAtt myLT.LatestVersionNumber
+      MaxSize: 3
+      MinSize: 1
+      TargetGroupARNs:
+        - !Ref myTG
+      VPCZoneIdentifier: !Ref SubnetParameter
+    myCPUPolicy:
+      Type: AWS::AutoScaling::ScalingPolicy
+      Properties:
+        AutoScalingGroupName: !Ref myASG
+        PolicyType: TargetTrackingScaling
+        TargetTrackingConfiguration:
+          PredefinedMetricSpecification:
+            PredefinedMetricType: ASGAverageCPUUtilization
+          TargetValue: 60.0
+      
+  myLT:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        ImageId: !FindInMap
+          - RegionMap
+          - !Ref "AWS::Region"
+          - AMI
+        InstanceType: !Ref InstanceType
+        KeyName: !Ref keyName
+        SecurityGroupIds:
+          - !GetAtt mySG.GroupId
+        
+        UserData:
+          Fn::Base64: !Sub |
+              #!/bin/bash
+              yum update -y
+              yum install -y httpd git
+              TOKEN=`curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600"` \
+              && PUBLIC_IP=`curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/public-ipv4`
+              chmod -R 777 /var/www/html
+              cd /var/www/html
+              rm -rf /var/www/html/*
+              git clone https://github.com/iskilicaslan61/Projects.git
+              cp -r Projects/101-kittens-carousel-static-website-ec2/static-web/* .
+              rm -rf Projects
+              systemctl start httpd
+              systemctl enable httpd
+        
+
+
+
+  myTG:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 10
+      HealthCheckTimeoutSeconds: 5
+      HealthyThresholdCount: 5
+      Port: 80
+      Protocol: HTTP
+      UnhealthyThresholdCount: 2
+      VpcId: !Ref VPCParameter
+  
+  mySG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow HTTP and SSH access to EC2
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0  
+      Tags:
+      - Key: Name
+        Value: MySecurityGroup
+      - Key: Environment
+        Value: Production
+      VpcId: !Ref VPCParameter
+
+Outputs:
+  LoadBalancerDNS:
+    Description: DNS name of the ALB
+    Value: !GetAtt myALB.DNSName
+  
+  

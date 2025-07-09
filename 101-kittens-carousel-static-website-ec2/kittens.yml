@@ -27,12 +27,17 @@ Parameters:
     Description: Name of the key pair to use for SSH access to the instance
     Type: AWS::EC2::KeyPair::KeyName
 
-Mappings:
-  RegionMap:
-    us-east-1:
-      AMI: ami-05ffe3c48a9991133
-    eu-central-1:
-      AMI: ami-0229b8f55e5178b65
+
+  LatestAmiId:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/al2023-ami-minimal-kernel-default-x86_64'
+
+#Mappings:
+ # RegionMap:
+  #  us-east-1:
+   #   AMI: ami-05ffe3c48a9991133
+    #eu-central-1:
+     # AMI: ami-0229b8f55e5178b65
 
 Resources:
 
@@ -57,12 +62,15 @@ Resources:
   myInstance:
     Type: AWS::EC2::Instance
     Properties:
-      ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", AMI]
+      ImageId: !Ref LatestAmiId
       InstanceType: !Ref InstanceType
       KeyName: !Ref keyName
       SubnetId: !Ref SubnetParameter
       SecurityGroupIds:
         - !Ref mySG
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-Instance
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
@@ -80,5 +88,7 @@ Resources:
 Outputs:
 
   PublicIP:
-    Description: Public IP address of the EC2 instance
-    Value: !GetAtt myInstance.PublicIp
+    Description: URL of the static website
+    Value: !Sub 
+      - http://${PublicDNS}
+      - PublicDNS : !GetAtt myInstance.PublicDnsName   
