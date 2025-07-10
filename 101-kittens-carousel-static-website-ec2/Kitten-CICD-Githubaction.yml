@@ -83,13 +83,14 @@ Resources:
           systemctl enable httpd
 
           # Deploy script oluşturuluyor
-          cat << 'EOF' > /home/ec2-user/deploy.sh
+          cat << "EOF" > /home/ec2-user/deploy.sh
           #!/bin/bash
           yum update -y
           yum install -y httpd git
-          chmod -R 777 /var/www/html
+          sudo chown -R ec2-user:ec2-user /var/www/html
+          chmod -R 755 /var/www/html
           cd /var/www/html
-          rm -rf /var/www/html/*
+          rm -rf *
           git clone https://github.com/iskilicaslan61/Projects.git
           cp -r Projects/101-kittens-carousel-static-website-ec2/static-web/* .
           rm -rf Projects
