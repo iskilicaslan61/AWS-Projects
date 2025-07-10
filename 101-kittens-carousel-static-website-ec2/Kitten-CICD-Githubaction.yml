@@ -94,8 +94,8 @@ Resources:
           git clone https://github.com/iskilicaslan61/Projects.git
           cp -r Projects/101-kittens-carousel-static-website-ec2/static-web/* .
           rm -rf Projects
-          systemctl start httpd
-          systemctl enable httpd
+          sudo systemctl restart httpd
+          sudo systemctl enable httpd
           EOF
 
           chmod +x /home/ec2-user/deploy.sh
