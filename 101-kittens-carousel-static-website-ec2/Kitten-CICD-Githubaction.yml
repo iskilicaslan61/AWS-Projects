@@ -73,35 +73,35 @@ Resources:
           yum update -y
           yum install -y httpd git
 
+          # Add SSH key for ec2-user
           mkdir -p /home/ec2-user/.ssh
           echo "${PublicKey}" >> /home/ec2-user/.ssh/authorized_keys
           chown -R ec2-user:ec2-user /home/ec2-user/.ssh
           chmod 700 /home/ec2-user/.ssh
           chmod 600 /home/ec2-user/.ssh/authorized_keys
 
+          # Start and enable Apache
           systemctl start httpd
           systemctl enable httpd
 
-          # Deploy script oluşturuluyor
+          # Create the deploy.sh script
           cat << "EOF" > /home/ec2-user/deploy.sh
           #!/bin/bash
-          yum update -y
-          yum install -y httpd git
-          sudo chown -R ec2-user:ec2-user /var/www/html
-          chmod -R 755 /var/www/html
-          cd /var/www/html
+          sudo yum update -y
+          sudo yum install -y git httpd
+
+          cd /var/www/html || exit 1
           rm -rf *
           git clone https://github.com/iskilicaslan61/Projects.git
           cp -r Projects/101-kittens-carousel-static-website-ec2/static-web/* .
           rm -rf Projects
+
           sudo systemctl restart httpd
-          sudo systemctl enable httpd
           EOF
 
+          # Set permissions and run the script
           chmod +x /home/ec2-user/deploy.sh
           chown ec2-user:ec2-user /home/ec2-user/deploy.sh
-
-          # it allows the ec2-user to run the deploy script without sudo
           sudo -u ec2-user /home/ec2-user/deploy.sh
 
 Outputs:
