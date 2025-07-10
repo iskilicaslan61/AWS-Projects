@@ -1,0 +1,110 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >
+  Example template to create an EC2 instance in a specified VPC subnet with a security group 
+  that allows HTTP and SSH access. The instance is configured to run a static website using Apache
+
+Parameters:
+
+  VPCParameter:
+    Description: Select the VPC where the resources will be created
+    Type: AWS::EC2::VPC::Id
+
+  SubnetParameter:
+    Description: Select the Subnet where the EC2 instance will be launched
+    Type: AWS::EC2::Subnet::Id
+
+  InstanceType:
+    Description: EC2 instance type
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - t3.micro
+      - t2.nano
+
+  keyName:
+    Description: SSH Key Pair name for EC2 login
+    Type: AWS::EC2::KeyPair::KeyName
+
+  PublicKey:
+    Description: Public SSH key to add for ec2-user
+    Type: String
+
+  LatestAmiId:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/al2023-ami-minimal-kernel-default-x86_64'
+
+Resources:
+
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable HTTP and SSH
+      VpcId: !Ref VPCParameter
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: StaticSiteSG
+
+  MyEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref LatestAmiId
+      KeyName: !Ref keyName
+      SubnetId: !Ref SubnetParameter
+      SecurityGroupIds:
+        - !Ref MySecurityGroup
+      Tags:
+        - Key: Name
+          Value: StaticSiteServer
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          yum update -y
+          yum install -y httpd git
+
+          mkdir -p /home/ec2-user/.ssh
+          echo "${PublicKey}" >> /home/ec2-user/.ssh/authorized_keys
+          chown -R ec2-user:ec2-user /home/ec2-user/.ssh
+          chmod 700 /home/ec2-user/.ssh
+          chmod 600 /home/ec2-user/.ssh/authorized_keys
+
+          systemctl start httpd
+          systemctl enable httpd
+
+          # Deploy script oluşturuluyor
+          cat << 'EOF' > /home/ec2-user/deploy.sh
+          #!/bin/bash
+          yum update -y
+          yum install -y httpd git
+          chmod -R 777 /var/www/html
+          cd /var/www/html
+          rm -rf /var/www/html/*
+          git clone https://github.com/iskilicaslan61/Projects.git
+          cp -r Projects/101-kittens-carousel-static-website-ec2/static-web/* .
+          rm -rf Projects
+          systemctl start httpd
+          systemctl enable httpd
+          EOF
+
+          chmod +x /home/ec2-user/deploy.sh
+          chown ec2-user:ec2-user /home/ec2-user/deploy.sh
+
+          # it allows the ec2-user to run the deploy script without sudo
+          sudo -u ec2-user /home/ec2-user/deploy.sh
+
+Outputs:
+
+  WebsiteURL:
+    Description: Site public DNS
+    Value: !Sub "http://${MyEC2Instance.PublicDnsName}"
